@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Batch billing · skail demo</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Batch billing</h1>
+      <p class="subtitle">A skail function issues the invoices of a batch in waves of 10, one run per invoice, and consolidates the result when all of them finish. The simulated city hall is unavailable on about 1 call in 10, and skail retries only that invoice.</p>
+    </header>
+
+    <section class="controls">
+      <label for="size">Batch size</label>
+      <select id="size">
+        <option value="10">10 invoices</option>
+        <option value="20" selected>20 invoices</option>
+        <option value="50">50 invoices</option>
+      </select>
+      <button id="start" type="button">Start</button>
+    </section>
+
+    <section class="status">
+      <span id="state" class="badge idle">Idle</span>
+      <span id="counter"></span>
+      <a id="monitor" href="#" target="_blank" rel="noopener" hidden>Open the skail Monitor</a>
+    </section>
+    <progress id="progress" max="1" value="0" hidden></progress>
+
+    <p id="error" class="error" hidden></p>
+
+    <section id="summary" class="summary" hidden>
+      <div><span id="sum-authorized">0</span><small>authorized (PDF sent)</small></div>
+      <div><span id="sum-rejected">0</span><small>rejected (finance)</small></div>
+      <div><span id="sum-pending">0</span><small>pending (finance)</small></div>
+      <div><span id="sum-total">0</span><small>billed</small></div>
+    </section>
+
+    <section>
+      <h2>Invoices</h2>
+      <table>
+        <thead><tr><th>#</th><th>Customer</th><th>Amount</th><th>Status</th><th>Attempts</th><th>Details</th></tr></thead>
+        <tbody id="invoices"></tbody>
+      </table>
+    </section>
+
+    <section class="inboxes">
+      <div>
+        <h2>Customer inbox <small>(PDFs received)</small> <span id="customer-count" class="count">0</span></h2>
+        <table>
+          <thead><tr><th>#</th><th>Customer</th><th>File</th><th>Amount</th></tr></thead>
+          <tbody id="customer-inbox"></tbody>
+        </table>
+      </div>
+      <div>
+        <h2>Finance inbox <small>(tickets received)</small> <span id="finance-count" class="count">0</span></h2>
+        <table>
+          <thead><tr><th>#</th><th>Customer</th><th>Status</th><th>Reason</th></tr></thead>
+          <tbody id="finance-inbox"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>Batch <code id="batchId">-</code></footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

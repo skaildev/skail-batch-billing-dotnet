@@ -1,0 +1,33 @@
+:root { color-scheme: light dark; --accent: #2563eb; --muted: #6b7280; --ok: #16a34a; --bad: #dc2626; --warn: #d97706; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: Canvas; color: CanvasText; }
+main { max-width: 980px; margin: 0 auto; padding: 2rem 1rem; }
+h1 { margin: 0; }
+h2 { font-size: 1rem; margin: 2rem 0 .5rem; }
+.subtitle { color: var(--muted); margin-top: .25rem; }
+.controls { display: flex; gap: .75rem; align-items: center; margin: 1.5rem 0 1rem; }
+select, button { font: inherit; padding: .5rem .9rem; border-radius: .5rem; border: 1px solid var(--muted); }
+button { background: var(--accent); border-color: var(--accent); color: #fff; cursor: pointer; min-width: 7rem; }
+button:disabled, select:disabled { opacity: .55; cursor: not-allowed; }
+.status { display: flex; gap: 1rem; align-items: center; color: var(--muted); }
+.badge { padding: .15rem .6rem; border-radius: 999px; background: var(--muted); color: #fff; font-size: .85rem; }
+.badge.active { background: var(--accent); }
+.badge.done { background: var(--ok); }
+.badge.failed { background: var(--bad); }
+progress { width: 100%; height: .6rem; margin-top: .75rem; }
+.error { color: var(--bad); }
+.summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin: 1.25rem 0; }
+.summary div { padding: .75rem; border: 1px solid color-mix(in srgb, CanvasText 20%, transparent); border-radius: .75rem; }
+.summary span { display: block; font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.summary small { color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid color-mix(in srgb, CanvasText 15%, transparent); }
+tr.retried td { background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.pill { padding: .05rem .5rem; border-radius: 999px; font-size: .8rem; color: #fff; background: var(--muted); }
+.pill.Issuing { background: var(--accent); } .pill.Authorized { background: var(--ok); }
+.pill.Rejected { background: var(--bad); } .pill.Pending { background: var(--warn); }
+footer { margin-top: 2rem; color: var(--muted); font-size: .85rem; }
+.inboxes { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.inboxes small { color: var(--muted); font-weight: normal; }
+.count { padding: .05rem .5rem; border-radius: 999px; background: var(--muted); color: #fff; font-size: .8rem; }
+@media (max-width: 760px) { .inboxes { grid-template-columns: 1fr; } }

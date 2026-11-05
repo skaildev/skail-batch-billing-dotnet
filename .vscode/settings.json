@@ -1,0 +1,8 @@
+{
+  "dotnet.defaultSolution": "SkailBatchBilling.sln",
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true
+  }
+}
