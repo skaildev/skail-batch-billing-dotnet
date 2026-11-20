@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Batch billing · skail demo</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Cpath d='M25.4385 18.2557L7.28223 18.2538L7.28125 4.53796C7.28123 3.98936 7.21634 0.353387 7.32422 0.00280762C13.2929 0.0779445 19.4626 0.0104719 25.4414 0.00280762L25.4385 18.2557ZM10.917 7.30261L18.1797 7.30164L18.1777 14.6083L21.8213 14.6102V3.6532C18.2322 3.65317 14.494 3.70895 10.918 3.64734L10.917 7.30261Z' fill='%2368057F'/%3E%3Cpath d='M0 14.609L3.6314 14.6068L3.6293 21.8979L10.9159 21.8957L10.9154 25.5448L2.61941e-05 25.5414L0 14.609Z' fill='%23E8611C'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* skail brand tokens, from skail.dev */
+    :root {
+      --bg: #ffffff; --bg2: #f7f7f8; --bg3: #f0f0f2; --card: #fafafb;
+      --ink: #111114; --ink2: #4b4c54; --ink3: #8a8b94;
+      --line: #ebebee; --line2: #dfdfe4;
+      --brand: #68057F; --brand2: #8b2fa8; --brand-soft: #f5edf8; --orange: #E8611C;
+      --ok: #17914f; --ok-soft: #e8f6ee; --run: #2d6be4; --run-soft: #e9f0fd;
+      --err: #d6363b; --err-soft: #fcebec; --warn: #b7791f; --warn-soft: #fdf4e3;
+      --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      --r: 14px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg2); color: var(--ink); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: var(--brand); }
+    .nav { background: var(--bg); border-bottom: 1px solid var(--line); }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 19px; letter-spacing: -.03em; color: var(--ink); text-decoration: none; }
+    .chip { font-size: 12px; padding: 2px 9px; border-radius: 7px; border: 1px solid var(--line2); background: var(--bg); color: var(--ink2); font-weight: 500; }
+    main.wrap { padding-top: 44px; padding-bottom: 60px; }
+    h1 { font-size: clamp(30px, 4.5vw, 44px); line-height: 1.05; letter-spacing: -.04em; font-weight: 500; margin: 0 0 12px; }
+    .lead { color: var(--ink2); max-width: 720px; margin: 0 0 28px; }
+    .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .btn { display: inline-flex; align-items: center; height: 40px; padding: 0 18px; border-radius: 999px; border: 0; font: 500 14px var(--sans); cursor: pointer; }
+    .btn-dark { background: var(--ink); color: #fff; }
+    .btn-brand { background: var(--brand); color: #fff; }
+    .btn-line { background: var(--bg); color: var(--err); border: 1px solid var(--line2); }
+    .btn:disabled { opacity: .35; cursor: not-allowed; }
+    .muted { color: var(--ink3); font-size: 14px; }
+    .mono { font-family: var(--mono); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; }
+    .card h2 { display: flex; justify-content: space-between; align-items: center; font-size: 17px; font-weight: 600; margin: 0 0 14px; letter-spacing: -.01em; }
+    .actions { display: flex; align-items: center; gap: 8px; }
+    .pill { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 999px; }
+    .running { background: var(--run-soft); color: var(--run); }
+    .pill, td.mono { white-space: nowrap; }
+    select { height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line2); background: var(--bg); font: 500 14px var(--sans); }
+    .Authorized { background: var(--ok-soft); color: var(--ok); }
+    .Rejected { background: var(--err-soft); color: var(--err); }
+    .Pending { background: var(--warn-soft); color: var(--warn); }
+    .Retrying { background: var(--err-soft); color: var(--err); border: 1px dashed var(--err); }
+    .Issuing { background: var(--run-soft); color: var(--run); }
+    .Waiting { background: var(--bg3); color: var(--ink3); }
+    .progress { height: 8px; border-radius: 999px; background: var(--bg3); overflow: hidden; margin: 4px 0 16px; }
+    .progress div { height: 100%; background: var(--brand); transition: width .3s; }
+    .stats { display: flex; gap: 28px; flex-wrap: wrap; }
+    .stats b { display: block; font-size: 22px; font-weight: 500; }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+    .tile { border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.4; white-space: nowrap; }
+    .tile b { display: block; font: 500 14px var(--mono); }
+    .tile small { display: block; font-size: 11px; opacity: .8; }
+    .inbox { list-style: none; margin: 0; padding: 0; font: 13px/1.8 var(--mono); color: var(--ink2); max-height: 320px; overflow: auto; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .empty { color: var(--ink3); font-size: 14px; }
+    footer { color: var(--ink3); font-size: 13px; margin-top: 28px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap">
+      <a class="logo" href="https://skail.dev" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 26 26" fill="none" aria-hidden="true"><path d="M25.4385 18.2557L7.28223 18.2538L7.28125 4.53796C7.28123 3.98936 7.21634 0.353387 7.32422 0.00280762C13.2929 0.0779445 19.4626 0.0104719 25.4414 0.00280762L25.4385 18.2557ZM10.917 7.30261L18.1797 7.30164L18.1777 14.6083L21.8213 14.6102V3.6532C18.2322 3.65317 14.494 3.70895 10.918 3.64734L10.917 7.30261Z" fill="#68057F"/><path d="M0 14.609L3.6314 14.6068L3.6293 21.8979L10.9159 21.8957L10.9154 25.5448L2.61941e-05 25.5414L0 14.609Z" fill="#E8611C"/></svg>
+        skail <span class="chip">demo</span>
+      </a>
+      <a class="muted" href="https://docs.skail.dev" target="_blank" rel="noopener">Docs</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>Batch billing</h1>
+    <p class="lead">A skail function bills a batch of orders: it asks the city hall for one service invoice per order, in
+      waves of 10, each invoice a child run with its own history. The simulated city hall is down on about 1 call in 10:
+      skail retries only that invoice, about 15 seconds later, and the others go on. An authorized invoice sends the PDF
+      to the customer; a rejected or pending one goes to finance, and the batch does not stop.</p>
+
+    <div class="bar">
+      <select id="size" aria-label="Batch size">
+        <option value="10">10 invoices</option>
+        <option value="20" selected>20 invoices</option>
+        <option value="50">50 invoices</option>
+      </select>
+      <button class="btn btn-brand" onclick="start()">Start a batch</button>
+    </div>
+
+    <section id="summary" class="card" hidden>
+      <h2><span>Batch <span id="batchId" class="muted mono"></span></span><span id="status" class="pill"></span></h2>
+      <div class="progress"><div id="bar"></div></div>
+      <div id="stats" class="stats"></div>
+    </section>
+
+    <section id="invoicesCard" class="card" style="margin-top: 16px" hidden>
+      <h2>Invoices</h2>
+      <div id="tiles" class="tiles"></div>
+      <div class="legend">
+        <span class="pill Authorized">authorized</span><span class="pill Rejected">rejected</span>
+        <span class="pill Pending">pending</span><span class="pill Retrying">city hall down, retrying</span>
+        <span class="pill Issuing">issuing</span><span class="pill Waiting">waiting for its wave</span>
+      </div>
+    </section>
+
+    <div id="inboxes" class="grid" style="margin-top: 16px" hidden>
+      <section class="card">
+        <h2>Customer inbox <span id="customerCount" class="muted"></span></h2>
+        <ol id="customer" class="inbox"></ol>
+      </section>
+      <section class="card">
+        <h2>Finance inbox <span id="financeCount" class="muted"></span></h2>
+        <ol id="finance" class="inbox"></ol>
+      </section>
+    </div>
+
+    <p id="empty" class="empty">No batch yet. Pick a size and start a batch.</p>
+
+    <footer>This is a demo, not production code: the city hall, the customer's mailbox and the finance inbox are
+      simulated, and no real invoice is issued. Each invoice is also a run in the <a href="https://docs.skail.dev/referencia/portal/monitor" target="_blank" rel="noopener">skail Monitor</a>.</footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const esc = (t) => String(t).replace(/</g, "&lt;");
+    const money = (v) => "R$ " + Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    let batch = null;
+
+    async function start() {
+      const response = await fetch(`/api/batches/${$("size").value}`, { method: "POST" });
+      if (!response.ok) alert(`The app answered ${response.status}.`);
+      await refresh();
+    }
+
+    function render() {
+      $("empty").hidden = !!batch;
+      for (const id of ["summary", "invoicesCard", "inboxes"]) $(id).hidden = !batch;
+      if (!batch) return;
+
+      $("batchId").textContent = batch.id.slice(0, 8);
+      $("status").textContent = batch.result ? "completed" : "running";
+      $("status").className = `pill ${batch.result ? "Authorized" : "Issuing"}`;
+      $("bar").style.width = `${(100 * batch.done) / batch.size}%`;
+      const r = batch.result;
+      $("stats").innerHTML = r
+        ? `<div><span class="muted">Authorized</span><b>${r.authorized}</b></div><div><span class="muted">Rejected</span><b>${r.rejected}</b></div>
+           <div><span class="muted">Pending</span><b>${r.pending}</b></div><div><span class="muted">Billed</span><b>${money(r.amountBilled)}</b></div>`
+        : `<div><span class="muted">Done</span><b>${batch.done} of ${batch.size}</b></div>`;
+
+      $("tiles").innerHTML = batch.invoices.map((i) => {
+        const title = `${i.customer}, ${money(i.amount)}${i.reason ? ": " + i.reason : ""}`;
+        const label = i.invoiceNumber ?? i.status.toLowerCase();
+        const tries = i.attempts > 1 ? `<small>${i.attempts} attempts</small>` : "";
+        return `<div class="tile ${i.status}" title="${esc(title)}"><b>#${i.number}</b>${esc(label)}${tries}</div>`;
+      }).join("");
+
+      $("customer").innerHTML = batch.customerInbox.map((m) => `<li>${esc(m)}</li>`).join("");
+      $("finance").innerHTML = batch.financeInbox.map((m) => `<li>${esc(m)}</li>`).join("");
+      $("customerCount").textContent = batch.customerInbox.length || "";
+      $("financeCount").textContent = batch.financeInbox.length || "";
+    }
+
+    async function refresh() {
+      try { batch = await (await fetch("/api/state")).json(); } catch { /* the app is restarting */ }
+      render();
+    }
+
+    refresh();
+    setInterval(refresh, 1000);
+  </script>
+</body>
+</html>
